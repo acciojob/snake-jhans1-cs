@@ -68,4 +68,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update snake body on the grid
     snake.forEach((pixelIndex, index) => {
-      pixels[pixelIndex
+      pixels[pixelIndex].classList.add('snakeBodyPixel');
+      if (index === 0) {
+        pixels[pixelIndex].classList.remove('snakeBodyPixel');
+      }
+    });
+  }
+
+  // Generate random food
+  function generateFood() {
+    const availablePixels = pixels.filter(pixel => !pixel.classList.contains('snakeBodyPixel'));
+    const randomIndex = Math.floor(Math.random() * availablePixels.length);
+    availablePixels[randomIndex].classList.add('food');
+  }
+
+  // Initial food generation
+  generateFood();
+});
