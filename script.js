@@ -1,87 +1,110 @@
-//your code here
 document.addEventListener('DOMContentLoaded', () => {
-  const gameContainer = document.getElementById('gameContainer');
-  const scoreBoard = document.createElement('div');
-  scoreBoard.classList.add('scoreBoard');
-  scoreBoard.innerText = 'Score: 0';
-  gameContainer.appendChild(scoreBoard);
+    const gameContainer = document.getElementById('gameContainer');
+    const scoreBoard = document.createElement('div');
+    scoreBoard.className = 'scoreBoard';
+    scoreBoard.textContent = 'Score: 0';
+    gameContainer.appendChild(scoreBoard);
 
-  const gridSize = 10; // Number of pixels in each row and column
-  const totalPixels = gridSize * gridSize;
-  const pixels = [];
+    const pixels = {};
+    let snake = [{ row: 20, col: 1 }];
+    let direction = 'right';
+    let food = null;
+    let score = 0;
 
-  // Create the grid of pixels
-  for (let i = 0; i < totalPixels; i++) {
-    const pixel = document.createElement('div');
-    pixel.classList.add('pixel');
-    pixel.setAttribute('id', 'pixel' + (i + 1));
-    gameContainer.appendChild(pixel);
-    pixels.push(pixel);
-  }
-
-  // Snake starting position
-  let snake = [61, 60, 59]; // Snake body pixels
-  let direction = 1; // 1: right, -1: left, gridSize: down, -gridSize: up
-
-  // Place the snake on the grid
-  snake.forEach(pixelIndex => {
-    pixels[pixelIndex].classList.add('snakeBodyPixel');
-  });
-
-  // Game loop
-  setInterval(() => {
-    moveSnake();
-  }, 100);
-
-  // Move the snake
-  function moveSnake() {
-    const head = snake[0];
-    const nextHead = head + direction;
-
-    // Check collision with walls or self
-    if (
-      nextHead < 0 ||
-      nextHead >= totalPixels ||
-      (direction === 1 && nextHead % gridSize === 0) || // Right wall
-      (direction === -1 && (head + 1) % gridSize === 0) || // Left wall
-      snake.includes(nextHead)
-    ) {
-      // Game over logic
-      return;
+    function createPixel(id, className) {
+        const pixel = document.createElement('div');
+        pixel.id = `pixel${id}`;
+        pixel.className = className;
+        return pixel;
     }
 
-    // Check collision with food
-    if (pixels[nextHead].classList.contains('food')) {
-      // Food eaten logic
-      pixels[nextHead].classList.remove('food');
-      snake.unshift(nextHead);
-      // Increase score
-      scoreBoard.innerText = 'Score: ' + snake.length;
-      // Generate new food
-      generateFood();
-    } else {
-      // Normal movement
-      const tail = snake.pop();
-      pixels[tail].classList.remove('snakeBodyPixel');
-      snake.unshift(nextHead);
+    function createFood() {
+        const pixelIds = Object.keys(pixels);
+        const randomId = pixelIds[Math.floor(Math.random() * pixelIds.length)];
+        food = pixels[randomId];
+        food.classList.add('food');
     }
 
-    // Update snake body on the grid
-    snake.forEach((pixelIndex, index) => {
-      pixels[pixelIndex].classList.add('snakeBodyPixel');
-      if (index === 0) {
-        pixels[pixelIndex].classList.remove('snakeBodyPixel');
-      }
+    function updateScore() {
+        score++;
+        scoreBoard.textContent = `Score: ${score}`;
+    }
+
+    function moveSnake() {
+        const head = Object.assign({}, snake[0]);
+
+        switch (direction) {
+            case 'up':
+                head.row--;
+                break;
+            case 'down':
+                head.row++;
+                break;
+            case 'left':
+                head.col--;
+                break;
+            case 'right':
+                head.col++;
+                break;
+        }
+
+        if (head.row < 1 || head.row > 20 || head.col < 1 || head.col > 20 || checkCollision(head)) {
+            clearInterval(gameInterval);
+            alert('Game Over!');
+            return;
+        }
+
+        snake.unshift(head);
+
+        if (head.row === food.row && head.col === food.col) {
+            food.classList.remove('food');
+            updateScore();
+            createFood();
+        } else {
+            const tail = snake.pop();
+            const tailPixel = document.getElementById(`pixel${tail.row}-${tail.col}`);
+            tailPixel.classList.remove('snakeBodyPixel');
+        }
+
+        const headPixel = document.getElementById(`pixel${head.row}-${head.col}`);
+        headPixel.classList.add('snakeBodyPixel');
+    }
+
+    function checkCollision(head) {
+        return snake.some(body => body.row === head.row && body.col === head.col);
+    }
+
+    for (let row = 1; row <= 20; row++) {
+        for (let col = 1; col <= 20; col++) {
+            const pixel = createPixel(`${row}-${col}`, 'pixel');
+            pixel.style.top = `${(row - 1) * 40}px`;
+            pixel.style.left = `${(col - 1) * 40}px`;
+            gameContainer.appendChild(pixel);
+            pixels[`${row}-${col}`] = pixel;
+        }
+    }
+
+    createFood();
+    const gameInterval = setInterval(moveSnake, 100);
+
+    document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case 'ArrowUp':
+                if (direction !== 'down')
+                    direction = 'up';
+                break;
+            case 'ArrowDown':
+                if (direction !== 'up')
+                    direction = 'down';
+                break;
+            case 'ArrowLeft':
+                if (direction !== 'right')
+                    direction = 'left';
+                break;
+            case 'ArrowRight':
+                if (direction !== 'left')
+                    direction = 'right';
+                break;
+        }
     });
-  }
-
-  // Generate random food
-  function generateFood() {
-    const availablePixels = pixels.filter(pixel => !pixel.classList.contains('snakeBodyPixel'));
-    const randomIndex = Math.floor(Math.random() * availablePixels.length);
-    availablePixels[randomIndex].classList.add('food');
-  }
-
-  // Initial food generation
-  generateFood();
 });

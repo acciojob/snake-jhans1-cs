@@ -1,28 +1,26 @@
 #gameContainer {
-  width: 400px;
-  height: 400px;
-  border: 1px solid black;
-  display: flex;
-  flex-wrap: wrap;
+    width: 400px;
+    height: 400px;
+    border: 1px solid black;
+    position: relative;
 }
 
 .pixel {
-  width: 40px;
-  height: 40px;
-  border: 1px solid lightgray;
-  box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ccc;
+    position: absolute;
 }
 
 .food {
-  background-color: red;
+    background-color: red;
 }
 
 .snakeBodyPixel {
-  background-color: green;
+    background-color: green;
 }
 
 .scoreBoard {
-  margin-top: 10px;
+    margin-top: 10px;
 }
-
 /* Your CSS Code here. */
